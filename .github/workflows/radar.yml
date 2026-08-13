@@ -14,15 +14,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install feedparser requests
 
       - name: Run One UI 9 Radar
@@ -39,7 +40,9 @@ jobs:
 
           git add seen.json
 
-          git diff --cached --quiet || \
-          git commit -m "Update radar history"
-
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Update radar history"
+            git push
+          else
+            echo "No changes to save."
+          fi
