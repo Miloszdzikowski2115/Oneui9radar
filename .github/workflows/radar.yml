@@ -1,0 +1,41 @@
+name: One UI 9 Radar
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+
+      - name: Uruchom Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalacja bibliotek
+        run: |
+          pip install feedparser requests
+
+      - name: Uruchom radar
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python oneui9_radar.py
+
+      - name: Zapisz historię
+        run: |
+          git config user.name "One UI 9 Radar"
+          git config user.email "radar@github.com"
+          git add seen.json
+          git diff --cached --quiet || git commit -m "Update radar history"
+          git push
